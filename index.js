@@ -42,6 +42,18 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 
+// JSON error handler for parser/middleware errors that happen before controllers
+app.use((err, req, res, next) => {
+  console.error('[Express Error]', err);
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal server error'
+  });
+});
+
 // Start scheduled jobs
 startInsightCron();
 

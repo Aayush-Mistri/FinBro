@@ -92,8 +92,8 @@ const GeminiService = {
   async extractTransactionsFromPDF(rawText, bankName) {
     const prompt = `You are an expert financial transaction extractor. Parse the following messy text from a bank statement for the bank: "${bankName || 'Unknown Bank'}".
 Extract all transactions (both credit and debit).
-Return ONLY a valid JSON array of objects, with no markdown formatting, no backticks, and no explanation.
-Each object in the array must strictly have these fields:
+Return ONLY a valid JSON object with a "transactions" array, with no markdown formatting, no backticks, and no explanation.
+Each object in the transactions array must strictly have these fields:
 - amount: (number, positive float)
 - direction: (string, either 'credit' or 'debit')
 - vpa: (string or null, e.g. 'friend@ybl', 'payment@paytm', or null)
@@ -101,6 +101,19 @@ Each object in the array must strictly have these fields:
 - raw_text: (string, the exact line or text snippet from which this transaction was extracted)
 
 If any field is missing or cannot be parsed, use null for that field. Do not skip any transactions.
+
+Format:
+{
+  "transactions": [
+    {
+      "amount": 0,
+      "direction": "debit",
+      "vpa": null,
+      "timestamp": null,
+      "raw_text": ""
+    }
+  ]
+}
 
 Statement text:
 """

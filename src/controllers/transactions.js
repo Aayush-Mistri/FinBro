@@ -22,6 +22,6 @@ exports.upload = async (req, res) => {
     });
   } catch (err) {
     console.error('[Transactions Controller] Error processing statement upload:', err);
-    return res.status(500).json({ error: 'Failed to process statement. ' + err.message });
+    return res.status(err.statusCode || 500).json({ error: 'Failed to process statement. ' + err.message });
   }
 };

@@ -68,7 +68,7 @@ async function fetchAPI(endpoint, options = {}) {
     headers
   });
 
-  const data = await response.json();
+  const data = await parseAPIResponse(response);
 
   if (!response.ok) {
     // Session expired
@@ -80,6 +80,18 @@ async function fetchAPI(endpoint, options = {}) {
   }
 
   return data;
+}
+
+async function parseAPIResponse(response) {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    return response.json();
+  }
+
+  const text = await response.text();
+  return {
+    error: text || `Request failed with status ${response.status}`
+  };
 }
 
 /* ==========================================================================
@@ -506,7 +518,7 @@ function initUpload() {
         body: formData
       });
 
-      const json = await res.json();
+      const json = await parseAPIResponse(res);
       if (!res.ok) throw new Error(json.error || 'Ingestion failed');
 
       showToast('Statement processed successfully!');
