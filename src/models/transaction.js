@@ -41,12 +41,12 @@ const Transaction = {
 
   getTopMerchants(userId, limit = 10) {
     const stmt = db.prepare(`
-      SELECT COALESCE(resolved_name, vpa, 'Unknown Merchant') AS merchant,
+      SELECT COALESCE(resolved_name, vpa, 'Unknown Merchant') AS merchant_name,
              SUM(amount) AS total_spend,
              COUNT(*) AS transaction_count
       FROM transactions
       WHERE user_id = ? AND direction = 'debit'
-      GROUP BY merchant
+      GROUP BY merchant_name
       ORDER BY total_spend DESC
       LIMIT ?
     `);
@@ -69,12 +69,12 @@ const Transaction = {
   getWeeklyCashflow(userId) {
     const stmt = db.prepare(`
       SELECT strftime('%Y-%W', timestamp) AS week,
-             SUM(CASE WHEN direction = 'credit' THEN amount ELSE 0 END) AS total_income,
-             SUM(CASE WHEN direction = 'debit' THEN amount ELSE 0 END) AS total_expense
+             SUM(CASE WHEN direction = 'credit' THEN amount ELSE 0 END) AS credits,
+             SUM(CASE WHEN direction = 'debit' THEN amount ELSE 0 END) AS debits
       FROM transactions
       WHERE user_id = ? AND timestamp IS NOT NULL
       GROUP BY week
-      ORDER BY week DESC
+      ORDER BY week ASC
     `);
     return stmt.all(userId);
   },

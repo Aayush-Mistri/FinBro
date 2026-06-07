@@ -22,6 +22,9 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static assets from public folder
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Mount Routes
 app.use('/auth', authRoutes);
 app.use('/transactions', transactionsRoutes);

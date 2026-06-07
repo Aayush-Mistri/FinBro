@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinSight — Personal UPI Financial Intelligence</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- Dynamic Notification / Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- AUTH SECTION (Show if not logged in) -->
+  <section id="auth-section" class="auth-section">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="logo-glow"><i class="fa-solid fa-coins"></i></div>
+        <h1>FinSight</h1>
+        <p>Personal UPI Finance Intelligence</p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form active">
+        <h2>Welcome Back</h2>
+        <div class="input-group">
+          <label for="login-email"><i class="fa-regular fa-envelope"></i> Email</label>
+          <input type="email" id="login-email" required placeholder="name@domain.com">
+        </div>
+        <div class="input-group">
+          <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+          <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary">Login <i class="fa-solid fa-arrow-right-to-bracket"></i></button>
+        <p class="auth-toggle">Don't have an account? <span id="to-register">Register here</span></p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" class="auth-form">
+        <h2>Create Account</h2>
+        <div class="input-group">
+          <label for="reg-name"><i class="fa-regular fa-user"></i> Full Name</label>
+          <input type="text" id="reg-name" required placeholder="John Doe">
+        </div>
+        <div class="input-group">
+          <label for="reg-email"><i class="fa-regular fa-envelope"></i> Email</label>
+          <input type="email" id="reg-email" required placeholder="name@domain.com">
+        </div>
+        <div class="input-group">
+          <label for="reg-password"><i class="fa-solid fa-lock"></i> Password</label>
+          <input type="password" id="reg-password" required minlength="6" placeholder="At least 6 characters">
+        </div>
+        <button type="submit" class="btn btn-primary">Register <i class="fa-solid fa-user-plus"></i></button>
+        <p class="auth-toggle">Already have an account? <span id="to-login">Login here</span></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- APP SECTION (Show if logged in) -->
+  <section id="app-section" class="app-section hidden">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+      <div class="sidebar-brand">
+        <i class="fa-solid fa-coins"></i>
+        <span>FinSight</span>
+      </div>
+      <div class="user-profile">
+        <div class="avatar"><i class="fa-solid fa-user-astronaut"></i></div>
+        <div class="user-info">
+          <span id="nav-user-name" class="user-name">User</span>
+          <span class="user-role">Member</span>
+        </div>
+      </div>
+      <ul class="nav-links">
+        <li class="active" data-view="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</li>
+        <li data-view="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Statement</li>
+        <li data-view="chat"><i class="fa-solid fa-comments"></i> Finance Chat</li>
+        <li data-view="labels"><i class="fa-solid fa-tags"></i> Custom Labels</li>
+      </ul>
+      <button id="btn-logout" class="btn btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </nav>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+      
+      <!-- DASHBOARD VIEW -->
+      <div id="view-dashboard" class="content-view active">
+        <header class="view-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Your financial pulse at a glance</p>
+          </div>
+          <div class="savings-rate-badge">
+            <span class="badge-label">30d Savings Rate</span>
+            <span id="dashboard-savings-percent" class="badge-value">0%</span>
+          </div>
+        </header>
+
+        <!-- Stats Overview Cards -->
+        <div class="stats-grid">
+          <div class="stat-card income">
+            <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
+            <div class="stat-details">
+              <h3>Total Income (30d)</h3>
+              <p id="dashboard-income">₹0.00</p>
+            </div>
+          </div>
+          <div class="stat-card expense">
+            <div class="stat-icon"><i class="fa-solid fa-credit-card"></i></div>
+            <div class="stat-details">
+              <h3>Total Spending (30d)</h3>
+              <p id="dashboard-expense">₹0.00</p>
+            </div>
+          </div>
+          <div class="stat-card net-savings">
+            <div class="stat-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+            <div class="stat-details">
+              <h3>Net Savings (30d)</h3>
+              <p id="dashboard-savings">₹0.00</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Charts & Insights Grid -->
+        <div class="dashboard-grid">
+          <!-- Weekly Cashflow Chart -->
+          <div class="grid-card double-width">
+            <h2>Weekly Cashflow</h2>
+            <div class="chart-container">
+              <canvas id="cashflow-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Category Spending Chart -->
+          <div class="grid-card">
+            <h2>Categories</h2>
+            <div class="chart-container">
+              <canvas id="categories-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- AI Weekly Financial Pulse -->
+          <div class="grid-card double-width">
+            <h2>AI Weekly Financial Pulse <span class="ai-pill"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Generated</span></h2>
+            <div id="dashboard-insights" class="insights-box">
+              <div class="loading-state">
+                <i class="fa-solid fa-spinner fa-spin"></i> Generating your money insights...
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Spending Merchants -->
+          <div class="grid-card">
+            <h2>Top Merchants (30d)</h2>
+            <ul id="dashboard-merchants" class="merchant-list">
+              <div class="empty-state">No transactions recorded. Upload a statement to begin!</div>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPLOAD VIEW -->
+      <div id="view-upload" class="content-view hidden">
+        <header class="view-header">
+          <div>
+            <h1>Upload Bank Statement</h1>
+            <p>Support for HDFC, SBI, ICICI, Axis, Kotak, and Yes Bank PDF statements</p>
+          </div>
+        </header>
+
+        <div class="upload-container">
+          <!-- Drag and Drop Zone -->
+          <div id="drop-zone" class="drop-zone">
+            <i class="fa-solid fa-file-pdf pdf-icon"></i>
+            <h3>Drag & Drop statement here</h3>
+            <p>or click to browse local files</p>
+            <input type="file" id="statement-file-input" accept=".pdf" class="hidden">
+            <span class="file-info" id="file-info">No file selected</span>
+          </div>
+
+          <button id="btn-upload-file" class="btn btn-primary btn-large" disabled>
+            Process Statement <i class="fa-solid fa-gears"></i>
+          </button>
+
+          <!-- Upload Ingestion Results Box -->
+          <div id="upload-results" class="upload-results-box hidden">
+            <h2>Ingestion Summary</h2>
+            <div class="results-grid">
+              <div class="result-tile">
+                <span class="number" id="res-total">0</span>
+                <span class="label">Total Found</span>
+              </div>
+              <div class="result-tile success">
+                <span class="number" id="res-inserted">0</span>
+                <span class="label">Newly Inserted</span>
+              </div>
+              <div class="result-tile warning">
+                <span class="number" id="res-skipped">0</span>
+                <span class="label">Duplicates Skipped</span>
+              </div>
+            </div>
+
+            <h3>Extracted Transaction Samples</h3>
+            <div class="table-wrapper">
+              <table class="transaction-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>VPA / Handle</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Direction</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="upload-sample-tbody">
+                  <!-- Dynamic rows go here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAT VIEW -->
+      <div id="view-chat" class="content-view hidden">
+        <div class="chat-container-layout">
+          <!-- Chat Panel -->
+          <div class="chat-main">
+            <header class="chat-header">
+              <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
+              <div>
+                <h2>FinSight Assistant</h2>
+                <p>Natural language personal finance consultant</p>
+              </div>
+            </header>
+            
+            <div id="chat-messages" class="chat-messages">
+              <!-- Welcome message -->
+              <div class="message assistant">
+                <div class="bubble">
+                  Hi, I am your FinSight AI financial assistant! I can query your statements, list transactions, find recurring items, and sum categories. Try asking me a question or use one of the quick prompts!
+                </div>
+              </div>
+            </div>
+
+            <!-- Typing indicator -->
+            <div id="chat-typing" class="chat-typing hidden">
+              <div class="typing-indicator">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+
+            <div class="chat-input-bar">
+              <input type="text" id="chat-input" placeholder="Type a message (e.g., 'How much did I spend on food last month?')...">
+              <button id="btn-chat-send" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
+
+          <!-- Suggester Sidebar -->
+          <div class="chat-sidebar">
+            <h3>Quick Prompts</h3>
+            <ul class="chat-prompts">
+              <li class="prompt-item">"How much did I spend on food this month?"</li>
+              <li class="prompt-item">"Find all transactions above ₹1000"</li>
+              <li class="prompt-item">"List my monthly subscription payments"</li>
+              <li class="prompt-item">"What is my current savings rate?"</li>
+              <li class="prompt-item">"Which merchant do I spend the most money on?"</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- LABELS VIEW -->
+      <div id="view-labels" class="content-view hidden">
+        <header class="view-header">
+          <div>
+            <h1>Custom VPA Labels</h1>
+            <p>Add recognizable nicknames and category mappings to override automated settings</p>
+          </div>
+        </header>
+
+        <div class="labels-container">
+          <!-- Input Form Card -->
+          <div class="grid-card form-card">
+            <h2>Add Custom Label</h2>
+            <form id="label-form">
+              <div class="input-row">
+                <div class="input-group">
+                  <label for="label-vpa">VPA Handle</label>
+                  <input type="text" id="label-vpa" required placeholder="username@upi / 9876543210@paytm">
+                </div>
+                <div class="input-group">
+                  <label for="label-name">Resolved Name</label>
+                  <input type="text" id="label-name" required placeholder="E.g., Mom, Landlord, Rahul">
+                </div>
+                <div class="input-group">
+                  <label for="label-category">Category</label>
+                  <select id="label-category" required>
+                    <option value="">-- Choose Category --</option>
+                    <option value="Food & Dining">Food & Dining</option>
+                    <option value="Shopping & Lifestyle">Shopping & Lifestyle</option>
+                    <option value="Transport & Travel">Transport & Travel</option>
+                    <option value="Utilities & Bills">Utilities & Bills</option>
+                    <option value="Rent & Housing">Rent & Housing</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Investment & Savings">Investment & Savings</option>
+                    <option value="Salaries & Income">Salaries & Income</option>
+                    <option value="Peer Transfers">Peer Transfers</option>
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">Save Label <i class="fa-solid fa-circle-check"></i></button>
+            </form>
+          </div>
+
+          <!-- Active Labels Table Card -->
+          <div class="grid-card table-card">
+            <h2>Configured Shortcuts</h2>
+            <div class="table-wrapper">
+              <table class="labels-table">
+                <thead>
+                  <tr>
+                    <th>VPA Handle</th>
+                    <th>Resolved Name</th>
+                    <th>Category Mapping</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="labels-tbody">
+                  <!-- Dynamic rows go here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </section>
+
+  <!-- Custom App JS -->
+  <script src="app.js"></script>
+</body>
+</html>

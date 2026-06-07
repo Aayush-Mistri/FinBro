@@ -1,4 +1,4 @@
-const pdfParse = require('pdf-parse');
+const { PDFParse } = require('pdf-parse');
 const GeminiService = require('./geminiService');
 const { enrichVpa } = require('./vpaEnricher');
 const { isDuplicate } = require('../utils/deduplicator');
@@ -29,10 +29,12 @@ function detectBank(text) {
  * @returns {Promise<object>} - Ingestion summary.
  */
 async function parseStatement(userId, pdfBuffer) {
-  // 1. Parse PDF to text (never touches disk)
+  // 1. Parse PDF to text using pdf-parse v2 class API (never touches disk)
   console.log(`[PDF Parser] Reading PDF buffer for user ID: ${userId}...`);
-  const parsedPdf = await pdfParse(pdfBuffer);
-  const rawText = parsedPdf.text;
+  const parser = new PDFParse({ data: pdfBuffer });
+  await parser.load();
+  const rawText = await parser.getText();
+  await parser.destroy();
 
   // 2. Identify the bank
   const bankName = detectBank(rawText);
