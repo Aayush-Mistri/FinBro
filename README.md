@@ -1,4 +1,4 @@
-# FinSight 🪙
+# FinBro 🪙
 **FinSight** is a personal finance intelligence backend application designed to analyze personal UPI financial transactions directly from bank statement PDFs. Built entirely on top of local services (SQLite, memory-based PDF parsing, and free-tier LLM integrations with Gemini and Groq fallback).
 
 ---
